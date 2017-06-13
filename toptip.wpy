@@ -1,0 +1,69 @@
+<template>
+  <view
+    wx:if="{{show}}"
+    animation="{{animationData}}"
+    class="weui-toptips weui-toptips_{{type === 'error' ? 'warn' : 'success'}}">
+    {{text}}
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy';
+
+  export default class Toptip extends wepy.component {
+
+    data = {
+      type: 'error',
+      duration: 2000,
+      animateDuration: 300,
+      animationData: '',
+      text: '',
+      show: false
+    };
+
+    methods = {
+      /**
+       * @param data: type, duration, text(required)
+       */
+      show(data = {}) {
+        // show
+        Object.assign(this, data, { show: true });
+        this.$apply();
+
+        // slide down toptip
+        let animation = wx.createAnimation({
+          duration: this.animateDuration,
+          timingFunction: 'ease-in'
+        });
+
+        animation.translateY(0).step();
+        this.animationData = animation.export();
+        this.$apply();
+
+        // duration 之后消失
+        setTimeout(() => {
+          this.hide();
+        }, this.duration);
+      }
+
+    };
+
+    hide() {
+      let animation = wx.createAnimation({
+        duration: this.animateDuration,
+        timingFunction: 'ease-out'
+      });
+
+      animation.translateY('-100%').step();
+      this.animationData = animation.export();
+      this.$apply();
+
+      // animate end, remove element
+      setTimeout(() => {
+        this.show = false;
+        this.$apply();
+      }, this.animateDuration + 50);
+    }
+
+  }
+</script>
